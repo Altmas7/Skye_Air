@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload & Convert Excel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+  <!-- SheetJS Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+
+<body>
+  <div class="email-container">
+    <h1>Upload Excel File</h1>
+    <p>Select an Excel/CSV file to convert into JSON format.</p>
+
+    <div class="upload-box">
+      <input type="file" id="excelFile" class="file-input" accept=".xlsx, .xls, .csv">
+      <!-- <p class="hint">Accepted: .xlsx, .xls, .csv (max 5 MB)</p> -->
+    </div>
+
+    <button class="btn" onclick="convertToJson()">Convert to JSON</button>
+    <!-- <button class="btn" onclick="postJson()">Post JSON</button> -->
+
+    <div id="output"
+      style="margin-top:20px; text-align:left; max-height:300px; overflow:auto; background:#f7f7f7; padding:10px; border-radius:6px; font-size:13px;">
+    </div>
+  </div>
+  <script>
+  let convertedData = []; // global variable to store JSON
+
+  function convertToJson() {
+    const fileInput = document.getElementById('excelFile');
+    const output = document.getElementById('output');
+
+    if (!fileInput.files.length) {
+      alert("Please upload a file first!");
+      return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+
+      let rawData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+      // Remove spaces from keys (your regex method)
+      convertedData = JSON.parse(JSON.stringify(rawData).replace(/\s(?=\w+":)/g, ""));
+
+      output.innerHTML = `<pre>${JSON.stringify(convertedData, null, 2)}</pre>`;
+    };
+
+    reader.readAsArrayBuffer(file);
+  }
+
+  // // 🚀 Function to POST JSON payload
+  // function postJson() {
+  //   if (convertedData.length === 0) {
+  //     alert("Please convert a file before posting!");
+  //     return;
+  //   }
+
+  //   fetch("https://your-api-endpoint.com/upload", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json"
+  //     },
+  //     body: JSON.stringify(convertedData)
+  //   })
+  //   .then(response => response.json())
+  //   .then(data => {
+  //     alert("Data posted successfully!");
+  //     console.log("Response:", data);
+  //   })
+  //   .catch(error => {
+  //     console.error("Error posting JSON:", error);
+  //     alert("Failed to post JSON.");
+  //   });
+  // }
+</script>
+
+
+  
+  <!-- //   function downloadJson() {
+  //     if (!convertedData.length) {
+  //       alert("Please convert a file first!");
+  //       return;
+  //     }
+
+  //     const blob = new Blob([JSON.stringify(convertedData, null, 2)], { type: "application/json" });
+  //     const url = URL.createObjectURL(blob);
+  //     const a = document.createElement("a");
+  //     a.href = url;
+  //     a.download = "data.json";
+  //     a.click();
+  //     URL.revokeObjectURL(url);
+  //   }
+  //  -->
+</body>
+
+</html>

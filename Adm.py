@@ -134,4 +134,4 @@ amount_input.send_keys("100")
 
 schedule_btn = driver.find_element(By.XPATH, "//button[normalize-space()='Schedule Flight']")
 schedule_btn.click()
-time.sleep(15)
+time.sleep(40)
